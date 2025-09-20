@@ -4,6 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -11,8 +15,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/sergeymakinen/go-ico"
+	_ "github.com/sergeymakinen/go-ico"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 const iconDir = `C:\\documents\\BUREAUBLADICONEN`
@@ -25,8 +31,7 @@ func main() {
 	}
 	siteName := getSiteName(&doc, url)
 	faviconURL := getFavicon(&doc, url, siteName)
-	iconRes := downloadFavicon(faviconURL)
-	img := saveImage(iconRes)
+	img := downloadAndDecodeImage(faviconURL)
 	createFolder()
 	iconPath := saveIco(siteName, img)
 	createShortcut(url, siteName, iconPath)
@@ -95,22 +100,27 @@ func getFavicon(doc *goquery.Document, inputURL, siteName string) string {
 	return faviconURL
 }
 
-func downloadFavicon(faviconURL string) *http.Response {
+func downloadAndDecodeImage(faviconURL string) image.Image {
 	iconRes, err := http.Get(faviconURL)
 	if err != nil || iconRes.StatusCode != 200 {
-		log.Fatalf("Failed to download favicon: %v", err)
+		log.Fatalf("Failed to download favicon: %v (status: %d)", err, iconRes.StatusCode)
 	}
 	defer iconRes.Body.Close()
-	return iconRes
-}
 
-func saveImage(iconRes *http.Response) image.Image {
-	img, _, err := image.Decode(iconRes.Body)
+	imageData, err := io.ReadAll(iconRes.Body)
+	if err != nil {
+		log.Fatalf("Failed to read image data: %v", err)
+	}
+
+	// Create a reader from the image data
+	imageReader := strings.NewReader(string(imageData))
+
+	img, format, err := image.Decode(imageReader)
 	if err != nil {
 		log.Fatalf("Failed to decode image: %v", err)
 	}
-	fmt.Println("Successfully decoded favicon image.")
 
+	fmt.Printf("Successfully decoded favicon image (format: %s).\n", format)
 	return img
 }
 
