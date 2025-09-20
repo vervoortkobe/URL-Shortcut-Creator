@@ -21,6 +21,7 @@ func main() {
 		log.Fatalf("Error fetching site: %v", err)
 	}
 	siteName := getSiteName(&doc, url)
+	faviconURL := getFavicon(&doc, url, siteName)
 }
 
 func getURL() string {
@@ -68,4 +69,20 @@ func getSiteName(doc *goquery.Document, inputURL string) string {
 	}
 	fmt.Printf("Found site name: %s\n", siteName)
 	return siteName
+}
+
+func getFavicon(doc *goquery.Document, inputURL, siteName string) string {
+	faviconURL, exists := doc.Find("link[rel='icon'], link[rel='shortcut icon']").Attr("href")
+	if !exists {
+		parsedURL, _ := url.Parse(inputURL)
+		faviconURL = parsedURL.Scheme + "://" + parsedURL.Host + "/favicon.ico"
+		fmt.Println("No favicon link found, trying default /favicon.ico")
+	} else {
+		base, _ := url.Parse(inputURL)
+		iconURL, _ := url.Parse(faviconURL)
+		faviconURL = base.ResolveReference(iconURL).String()
+	}
+	fmt.Printf("Found favicon URL: %s\n", faviconURL)
+
+	return faviconURL
 }
