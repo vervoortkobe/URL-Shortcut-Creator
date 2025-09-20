@@ -8,9 +8,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/harrydb/go/ico"
 )
 
 const iconDir = `C:\documents\BUREAUBLADICONEN`
@@ -24,7 +26,10 @@ func main() {
 	siteName := getSiteName(&doc, url)
 	faviconURL := getFavicon(&doc, url, siteName)
 	iconRes := downloadFavicon(faviconURL)
-	saveImage(iconRes)
+	img := saveImage(iconRes)
+	createFolder()
+	iconPath := saveIco(siteName, img)
+	createShortcut(url, siteName, iconPath)
 }
 
 func getURL() string {
@@ -99,10 +104,53 @@ func downloadFavicon(faviconURL string) *http.Response {
 	return iconRes
 }
 
-func saveImage(iconRes *http.Response) {
+func saveImage(iconRes *http.Response) image.Image {
 	img, _, err := image.Decode(iconRes.Body)
 	if err != nil {
 		log.Fatalf("Failed to decode image: %v", err)
 	}
 	fmt.Println("Successfully decoded favicon image.")
+
+	return img
+}
+
+func createFolder() {
+	if _, err := os.Stat(iconDir); os.IsNotExist(err) {
+		fmt.Printf("Creating directory: %s\n", iconDir)
+		if err := os.MkdirAll(iconDir, 0755); err != nil {
+			log.Fatalf("Failed to create icon directory: %v", err)
+		}
+	}
+}
+
+func saveIco(siteName string, img image.Image) string {
+	safeFileName := strings.ReplaceAll(siteName, ".", "_")
+	safeFileName = strings.Map(func(r rune) rune {
+		if strings.ContainsRune(`\/:*?"<>|`, r) {
+			return -1
+		}
+		return r
+	}, safeFileName)
+
+	iconPath := filepath.Join(iconDir, safeFileName+".ico")
+	file, err := os.Create(iconPath)
+	if err != nil {
+		log.Fatalf("Failed to create .ico file: %v", err)
+	}
+	defer file.Close()
+
+	if err := ico.Encode(file, img); err != nil {
+		log.Fatalf("Failed to encode to .ico format: %v", err)
+	}
+	fmt.Printf("Icon saved to: %s\n", iconPath)
+
+	return iconPath
+}
+
+func createShortcut(inputURL, siteName, iconPath string) {
+	if err := createDesktopShortcut(inputURL, siteName, iconPath); err != nil {
+		log.Fatalf("Failed to create shortcut: %v", err)
+	}
+
+	fmt.Println("\nShortcut created successfully on your desktop!")
 }
