@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("Error fetching site: %v", err)
 	}
 	siteName := getSiteName(&doc, url)
-	faviconURL := getFavicon(&doc, url, siteName)
+	faviconURL := getFavicon(&doc, url)
 	img := downloadAndDecodeImage(faviconURL)
 	createFolder()
 	iconPath := saveIco(siteName, img)
@@ -61,7 +61,7 @@ func getURL() string {
 		inputURL = "https://" + inputURL
 	}
 
-	fmt.Printf("Processing URL: %s\n", inputURL)
+	fmt.Printf("> Processing URL: %s\n", inputURL)
 
 	return inputURL
 }
@@ -91,22 +91,22 @@ func getSiteName(doc *goquery.Document, inputURL string) string {
 		parsedURL, _ := url.Parse(inputURL)
 		siteName = parsedURL.Host
 	}
-	fmt.Printf("Found site name: %s\n", siteName)
+	fmt.Printf("> Found site name: %s\n", siteName)
 	return siteName
 }
 
-func getFavicon(doc *goquery.Document, inputURL, siteName string) string {
+func getFavicon(doc *goquery.Document, inputURL string) string {
 	faviconURL, exists := doc.Find("link[rel='icon'], link[rel='shortcut icon']").Attr("href")
 	if !exists {
 		parsedURL, _ := url.Parse(inputURL)
 		faviconURL = parsedURL.Scheme + "://" + parsedURL.Host + "/favicon.ico"
-		fmt.Println("No favicon link found, trying default /favicon.ico")
+		fmt.Println("> No favicon link found, trying default /favicon.ico")
 	} else {
 		base, _ := url.Parse(inputURL)
 		iconURL, _ := url.Parse(faviconURL)
 		faviconURL = base.ResolveReference(iconURL).String()
 	}
-	fmt.Printf("Found favicon URL: %s\n", faviconURL)
+	fmt.Printf("> Found favicon URL: %s\n", faviconURL)
 
 	return faviconURL
 }
@@ -130,7 +130,7 @@ func downloadAndDecodeImage(faviconURL string) image.Image {
 		log.Fatalf("Failed to decode image: %v", err)
 	}
 
-	fmt.Printf("Successfully decoded favicon image (format: %s).\n", format)
+	fmt.Printf("> Successfully decoded favicon image (format: %s).\n", format)
 	return img
 }
 
@@ -161,7 +161,7 @@ func saveIco(siteName string, img image.Image) string {
 	if err := ico.Encode(file, img); err != nil {
 		log.Fatalf("Failed to encode to .ico format: %v", err)
 	}
-	fmt.Printf("Icon saved to: %s\n", iconPath)
+	fmt.Printf("> Icon saved to: %s\n", iconPath)
 
 	return iconPath
 }

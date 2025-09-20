@@ -23,7 +23,7 @@ func createDesktopShortcut(targetURL, shortcutName, iconLocation string) error {
 	}, shortcutName)
 
 	shortcutPath := filepath.Join(desktopPath, safeShortcutName+".url")
-	fmt.Printf("Creating internet shortcut at: %s\n", shortcutPath)
+	fmt.Printf("✅ Creating desktop shortcut at: %s\n", shortcutPath)
 
 	urlFileContent := fmt.Sprintf(`[InternetShortcut]
 URL=%s
