@@ -12,10 +12,10 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/harrydb/go/ico"
+	"github.com/akavel/rsrc/ico"
 )
 
-const iconDir = `C:\documents\BUREAUBLADICONEN`
+const iconDir = `C:\\documents\\BUREAUBLADICONEN`
 
 func main() {
 	url := getURL()
