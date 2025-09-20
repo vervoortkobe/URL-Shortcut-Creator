@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"image"
 	"log"
 	"net/http"
 	"net/url"
@@ -22,7 +23,8 @@ func main() {
 	}
 	siteName := getSiteName(&doc, url)
 	faviconURL := getFavicon(&doc, url, siteName)
-	downloadFavicon(faviconURL)
+	iconRes := downloadFavicon(faviconURL)
+	saveImage(iconRes)
 }
 
 func getURL() string {
@@ -88,10 +90,19 @@ func getFavicon(doc *goquery.Document, inputURL, siteName string) string {
 	return faviconURL
 }
 
-func downloadFavicon(faviconURL string) {
+func downloadFavicon(faviconURL string) *http.Response {
 	iconRes, err := http.Get(faviconURL)
 	if err != nil || iconRes.StatusCode != 200 {
 		log.Fatalf("Failed to download favicon: %v", err)
 	}
 	defer iconRes.Body.Close()
+	return iconRes
+}
+
+func saveImage(iconRes *http.Response) {
+	img, _, err := image.Decode(iconRes.Body)
+	if err != nil {
+		log.Fatalf("Failed to decode image: %v", err)
+	}
+	fmt.Println("Successfully decoded favicon image.")
 }
