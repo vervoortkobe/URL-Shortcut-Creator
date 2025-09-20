@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/akavel/rsrc/ico"
+	"github.com/sergeymakinen/go-ico"
 )
 
 const iconDir = `C:\\documents\\BUREAUBLADICONEN`
@@ -124,13 +124,12 @@ func createFolder() {
 }
 
 func saveIco(siteName string, img image.Image) string {
-	safeFileName := strings.ReplaceAll(siteName, ".", "_")
-	safeFileName = strings.Map(func(r rune) rune {
+	safeFileName := strings.Map(func(r rune) rune {
 		if strings.ContainsRune(`\/:*?"<>|`, r) {
-			return -1
+			return '_'
 		}
 		return r
-	}, safeFileName)
+	}, siteName)
 
 	iconPath := filepath.Join(iconDir, safeFileName+".ico")
 	file, err := os.Create(iconPath)
