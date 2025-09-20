@@ -22,6 +22,7 @@ func main() {
 	}
 	siteName := getSiteName(&doc, url)
 	faviconURL := getFavicon(&doc, url, siteName)
+	downloadFavicon(faviconURL)
 }
 
 func getURL() string {
@@ -85,4 +86,12 @@ func getFavicon(doc *goquery.Document, inputURL, siteName string) string {
 	fmt.Printf("Found favicon URL: %s\n", faviconURL)
 
 	return faviconURL
+}
+
+func downloadFavicon(faviconURL string) {
+	iconRes, err := http.Get(faviconURL)
+	if err != nil || iconRes.StatusCode != 200 {
+		log.Fatalf("Failed to download favicon: %v", err)
+	}
+	defer iconRes.Body.Close()
 }
