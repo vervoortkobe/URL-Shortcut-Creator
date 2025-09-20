@@ -5,18 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/go-ole/go-ole"
-	"github.com/go-ole/go-ole/oleutil"
 )
-
-func getDesktopPath(wshell *ole.IDispatch) (string, error) {
-	desktop, err := oleutil.CallMethod(wshell, "SpecialFolders", "Desktop")
-	if err != nil {
-		return "", fmt.Errorf("failed to get desktop folder: %v", err)
-	}
-	return desktop.ToString(), nil
-}
 
 func createDesktopShortcut(targetURL, shortcutName, iconLocation string) error {
 	userProfile, exists := os.LookupEnv("USERPROFILE")

@@ -118,13 +118,11 @@ func downloadAndDecodeImage(faviconURL string) image.Image {
 	}
 	defer iconRes.Body.Close()
 
-	// Read the entire response body into memory
 	imageData, err := io.ReadAll(iconRes.Body)
 	if err != nil {
 		log.Fatalf("Failed to read image data: %v", err)
 	}
 
-	// Create a reader from the image data
 	imageReader := strings.NewReader(string(imageData))
 
 	img, format, err := image.Decode(imageReader)
