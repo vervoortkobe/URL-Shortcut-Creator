@@ -16,14 +16,15 @@ import (
 	"strings"
 
 	"github.com/sergeymakinen/go-ico"
-	_ "github.com/sergeymakinen/go-ico"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-const iconDir = `C:\\documents\\BUREAUBLADICONEN`
+var iconDir string
 
 func main() {
+	initIconDir()
+
 	url := getURL()
 	doc, err := fetchSite(url)
 	if err != nil {
@@ -35,6 +36,16 @@ func main() {
 	createFolder()
 	iconPath := saveIco(siteName, img)
 	createShortcut(url, siteName, iconPath)
+}
+
+func initIconDir() {
+	userHome, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalf("Failed to get user home directory: %v", err)
+	}
+
+	iconDir = filepath.Join(userHome, "Documents", "bureaubladiconen")
+	fmt.Printf("Icon directory set to: %s\n", iconDir)
 }
 
 func getURL() string {
@@ -107,6 +118,7 @@ func downloadAndDecodeImage(faviconURL string) image.Image {
 	}
 	defer iconRes.Body.Close()
 
+	// Read the entire response body into memory
 	imageData, err := io.ReadAll(iconRes.Body)
 	if err != nil {
 		log.Fatalf("Failed to read image data: %v", err)
