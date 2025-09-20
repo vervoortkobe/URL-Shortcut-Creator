@@ -44,7 +44,7 @@ func initIconDir() {
 		log.Fatalf("Failed to get user home directory: %v", err)
 	}
 
-	iconDir = filepath.Join(userHome, "Documents", "bureaubladiconen")
+	iconDir = filepath.Join(userHome, "Documents", "BUREAUBLADICONEN")
 	fmt.Printf("Icon directory set to: %s\n", iconDir)
 }
 
